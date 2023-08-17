@@ -42,6 +42,8 @@ class Board
         if player_combination != 0 && index != 0
           update_board(player_combination, board_visual[@current_row])
           player_combination = 0
+
+          board_visual[index + 1].sort!
           @current_row += 2
         end
       end
@@ -52,7 +54,6 @@ class Board
   def update_board(player_combination, array)
     for i in 0..3
       array[i] = player_combination[i]
-      p board_visual
     end
     array
   end
@@ -73,12 +74,11 @@ class Pins
 end
 
 class Game
-
   def initialize
     @turn_counter = 0
   end
 
-  def game_state(randomized_pins, small_colors, player_input, board)
+  def game_state(randomized_pins, small_colors, player_input, board, name)
     p player_input
     player_input_new = transform_player_input(player_input)
     p player_input_new
@@ -97,11 +97,12 @@ class Game
 
     @turn_counter += 1
 
-    if @turn_counter < 12
+    if @turn_counter <= 12
       comparable_player_input_new = player_input_new.join("")
+
       if randomized_pins == comparable_player_input_new
-        puts "You won the game after #{@turn_counter} turns!"
-        exit
+          puts "Congratulations #{name}! You won the game after #{@turn_counter} turn(s)!"
+          exit
       end
     else
       puts "You couldn't guess the correct color pattern within 12 turns. You lose!"
@@ -138,7 +139,7 @@ end
 
 
 class Player
-  attr_reader :player_input_array
+  attr_reader :player_input_array, :name
 
   def initialize(name)
     @name = name
@@ -147,7 +148,7 @@ class Player
 
   def get_player_input
     puts "Please enter 4 colors. Hit the enter key after each color.
-You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple), O (Orange)"
+You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and O (Orange)."
     player_input_array.clear
 
     count = 1
@@ -175,16 +176,11 @@ end
 
 
 class Computer
-  def initialize
-
-  end
-
   def generate_combination(colors)
     for i in 0..94
       colors << colors[i]
     end
     randomized_colors = colors.shuffle.pop(4)
-    p randomized_colors.join("")
   end
 end
 
@@ -203,6 +199,6 @@ board.print_board
 
 random_colors = com.generate_combination(pins.colors)
 
-for i in 1..12
-game.game_state(random_colors, pins.small_colors, player.get_player_input, board)
+12.times do
+game.game_state(random_colors, pins.small_colors, player.get_player_input, board, player.name)
 end
