@@ -43,7 +43,8 @@ class Board
           update_board(player_combination, board_visual[@current_row])
           player_combination = 0
 
-          board_visual[index + 1].sort!
+          board_visual[@current_row + 1].sort!.reverse!
+
           @current_row += 2
         end
       end
@@ -84,7 +85,9 @@ class Game
     p player_input_new
 
     player_input_new.each_with_index do |player_pin, index|
-      if player_pin == randomized_pins[index] &&
+      pin_counter = randomized_pins.count(player_input)
+
+      if player_pin == randomized_pins[index]
         board.update_small_pins(small_colors, 0) # Green
 
       elsif randomized_pins.include?(player_pin)
@@ -181,6 +184,7 @@ class Computer
       colors << colors[i]
     end
     randomized_colors = colors.shuffle.pop(4)
+    p randomized_colors
   end
 end
 

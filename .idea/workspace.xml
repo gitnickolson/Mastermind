@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="08b1ff7e-5d18-4a09-b60e-e655ad8cd235" name="Changes" comment="Updated the code&#10;- The game is almost working as intended, just need to change a few things so that it's actually somewhat difficult">
+    <list default="true" id="08b1ff7e-5d18-4a09-b60e-e655ad8cd235" name="Changes" comment="Updated the code">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.rb" beforeDir="false" afterPath="$PROJECT_DIR$/main.rb" afterDir="false" />
     </list>
@@ -60,7 +60,7 @@
       <workItem from="1692090180295" duration="5255000" />
       <workItem from="1692096872965" duration="10747000" />
       <workItem from="1692166733773" duration="8000" />
-      <workItem from="1692252438872" duration="13212000" />
+      <workItem from="1692252438872" duration="19542000" />
     </task>
     <task id="LOCAL-00001" summary="You can now print the board">
       <option name="closed" value="true" />
@@ -102,20 +102,39 @@
       <option name="project" value="LOCAL" />
       <updated>1692261967879</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Updated the code">
+      <option name="closed" value="true" />
+      <created>1692266171895</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1692266171895</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="You can now print the board" />
-    <MESSAGE value="Updated the code" />
     <MESSAGE value="Updated the code&#10;- The game is almost working as intended, just need to change a few things so that it's actually somewhat difficult" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated the code&#10;- The game is almost working as intended, just need to change a few things so that it's actually somewhat difficult" />
+    <MESSAGE value="Updated the code" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated the code" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Mastermind@Main.rcov" NAME="Main Coverage Results" MODIFIED="1692090454875" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="Mastermind" />
-    <SUITE FILE_PATH="coverage/Mastermind@main.rcov" NAME="main Coverage Results" MODIFIED="1692265727332" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="Mastermind" />
+    <SUITE FILE_PATH="coverage/Mastermind@main.rcov" NAME="main Coverage Results" MODIFIED="1692276374241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="Mastermind" />
   </component>
 </project>
