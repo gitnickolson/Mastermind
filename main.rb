@@ -2,10 +2,9 @@ class Board
   attr_accessor :turns, :board_visual, :pin_board, :has_walls
 
   def initialize
-    @board_visual = Array.new(26) # 12 Turns (12) + Actual code hatch (1) + 12 Correction-pin-boxes + Empty array
-    @turns = 12
-    @has_walls = false
+    @board_visual = Array.new(26)
     @current_row = 2
+    @pin_slot = 0
   end
 
   def set_up
@@ -27,14 +26,9 @@ class Board
     end
   end
 
-  def print_board(player_combination = 0)
+  def print_board
     board_visual.each_with_index do |row, index|
       if index.even?
-        if player_combination != 0 && index != 0
-          board_visual[@current_row] = update_board(player_combination, row)
-          player_combination = 0
-          @current_row += 2
-        end
         print row.join("")
       else
         puts row.join("")
@@ -42,45 +36,76 @@ class Board
     end
   end
 
+  def board_row_update(player_combination)
+    board_visual.each_with_index do |row, index|
+      if index.even?
+        if player_combination != 0 && index != 0
+          update_board(player_combination, board_visual[@current_row])
+          player_combination = 0
+          @current_row += 2
+        end
+      end
+    end
+    @pin_slot = 0
+  end
+
   def update_board(player_combination, array)
     for i in 0..3
       array[i] = player_combination[i]
+      p board_visual
     end
     array
+  end
+
+  def update_small_pins(small_pins, indicator)
+    board_visual[@current_row + 1][@pin_slot] = small_pins[indicator]
+    @pin_slot += 1
   end
 end
 
 class Pins
-  attr_reader :colors
+  attr_reader :colors, :small_colors
 
   def initialize
     @colors = ["🔴", "🔵", "🟡", "🟢", "🟣", "🟠"]
-
-
-
-    @small_color1 = "🟩"
-    @small_color2 = "🟪"
+    @small_colors = ["🟩", "🟪"]
   end
 end
 
 class Game
-  attr_accessor = :turn_counter
+
   def initialize
     @turn_counter = 0
   end
 
-  def game_turn(randomized_pins, player_input, board)
+  def game_state(randomized_pins, small_colors, player_input, board)
     p player_input
     player_input_new = transform_player_input(player_input)
     p player_input_new
-    board.print_board(player_input_new)
+
+    player_input_new.each_with_index do |player_pin, index|
+      if player_pin == randomized_pins[index] &&
+        board.update_small_pins(small_colors, 0) # Green
+
+      elsif randomized_pins.include?(player_pin)
+        board.update_small_pins(small_colors, 1) # Purple
+      end
+    end
+
+    board.board_row_update(player_input_new)
+    board.print_board
+
+    @turn_counter += 1
 
     if @turn_counter < 12
-      if randomized_pins == player_input
+      comparable_player_input_new = player_input_new.join("")
+      if randomized_pins == comparable_player_input_new
         puts "You won the game after #{@turn_counter} turns!"
+        exit
       end
     else
       puts "You couldn't guess the correct color pattern within 12 turns. You lose!"
+      exit
     end
   end
 
@@ -113,14 +138,17 @@ end
 
 
 class Player
+  attr_reader :player_input_array
+
   def initialize(name)
     @name = name
+    @player_input_array = Array.new
   end
 
   def get_player_input
     puts "Please enter 4 colors. Hit the enter key after each color.
 You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple), O (Orange)"
-    player_input_array = Array.new
+    player_input_array.clear
 
     count = 1
     4.times do
@@ -148,9 +176,13 @@ end
 
 class Computer
   def initialize
+
   end
 
   def generate_combination(colors)
+    for i in 0..94
+      colors << colors[i]
+    end
     randomized_colors = colors.shuffle.pop(4)
     p randomized_colors.join("")
   end
@@ -169,5 +201,8 @@ player = Player.new(gets.chomp)
 board.set_up
 board.print_board
 
+random_colors = com.generate_combination(pins.colors)
 
-game.game_turn(com.generate_combination(pins.colors), player.get_player_input, board)
+for i in 1..12
+game.game_state(random_colors, pins.small_colors, player.get_player_input, board)
+end
