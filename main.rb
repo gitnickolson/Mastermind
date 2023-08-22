@@ -63,6 +63,7 @@ class Board
   end
 end
 
+
 class Pins
   attr_reader :colors, :small_colors
 
@@ -72,26 +73,45 @@ class Pins
   end
 end
 
+
 class Game
   attr_accessor :board, :pins, :com, :player, :randomized_pins,
-                :small_colors, :player_input, :player_wins, :turn_counter,
-                :combinations_hash, :randomized_colors_ords
+                :small_colors, :player_input, :turn_counter,
+                :combinations_hash, :randomized_colors_ords, :game_ended
+  TURNS = 12
 
   def initialize
     @turn_counter = 0
-    @player_wins = false
     @board = Board.new
     @pins = Pins.new
     @com = Computer.new
     @player = Player.new
-
-    gamemode_choice
   end
+
+  def start
+    puts "Welcome to mastermind! You can check out this link if you need the rules: 'https://en.wikipedia.org/wiki/Mastermind_'"
+    puts "Do you want to be the codebreaker(1), or the codemaker(2)?"
+    loop do
+      gamemode = gets.chomp.to_i
+      if gamemode == 1
+        gamebreaker_loop
+        break
+      elsif gamemode == 2
+        gamemaker_loop
+        break
+      else
+        puts "Please enter 1 or 2"
+      end
+    end
+  end
+
+  private
 
   def gamebreaker_loop
     @randomized_pins = com.generate_combination(pins.colors)
     @small_colors = pins.small_colors
     @randomized_colors_ords = Array.new
+    @game_ended = false
 
     @board.set_up
     @board.print_board
@@ -106,7 +126,12 @@ class Game
     }
 
     count_color_occurences
-    12.times { game_state }
+    TURNS.times do
+      if game_ended == true
+        break
+      end
+      game_state
+    end
   end
 
   def gamemaker_loop
@@ -117,22 +142,19 @@ class Game
     com.randomized_colors.each do |color_symbol|
       randomized_colors_ords << color_symbol.ord
     end
-
-    com.randomized_colors.each_with_index do |pin, index|
-      count = randomized_colors_ords.count(pin.ord)
-      combinations_hash[pin] = count
-      count = 0
+    com.randomized_colors.each do |pin|
+      combinations_hash[pin] = randomized_colors_ords.count(pin.ord)
     end
   end
 
   def game_state
     player.get_gamebreaker_input
     player_input = player.player_input_array
-    transformed_player_input = transform_player_input(player_input)
+    transform_player_input(player_input)
 
     temporary_combinations_hash = combinations_hash.dup
 
-    transformed_player_input.each_with_index do |player_pin, index|
+    player_input.each_with_index do |player_pin, index|
       if player_pin == randomized_pins[index] && temporary_combinations_hash[player_pin] > 0
       board.update_small_pins(small_colors, 0) # Green
       temporary_combinations_hash[player_pin] -= 1
@@ -143,74 +165,49 @@ class Game
       end
     end
 
-    board.board_row_update(transformed_player_input)
+    board.board_row_update(player_input)
     board.print_board
     @turn_counter += 1
 
-    if turn_counter < 12
-      comparable_player_input = transformed_player_input.join("")
+    if turn_counter < TURNS
+      comparable_player_input = player_input.join("")
 
-      if randomized_pins.join("") == comparable_player_input
-        @player_wins = true
-        decision_output
+      if randomized_pins == comparable_player_input
+        decision_output(true)
       end
     else
-      @player_wins = false
-      decision_output
+      decision_output(false)
     end
   end
 
-
-  def decision_output
+  def decision_output(player_wins)
     if player_wins == true
+      @game_ended = true
       p "Congratulations! You won the game after #{turn_counter} turn(s)!"
-      exit
     elsif player_wins == false
+      @game_ended = true
       p "You couldn't guess the correct color pattern within 12 turns. You lose!"
-      p "The correct color pattern would've been #{randomized_pins.join("")}"
-      exit
+      p "The correct color pattern would've been #{randomized_pins}"
     end
   end
 
   def transform_player_input(player_input)
-    for i in 0..4
-      case player_input[i]
-      when "r"
-        player_input[i] = "🔴"
+    
+    transformation_hash = {
+      "r" => "🔴",
+      "g" => "🟢",
+      "b" => "🔵",
+      "y" => "🟡",
+      "p" => "🟣",
+      "o" => "🟠"
+    }
 
-      when "g"
-        player_input[i] = "🟢"
-
-      when "b"
-        player_input[i] = "🔵"
-
-      when "y"
-        player_input[i] = "🟡"
-
-      when "p"
-        player_input[i] = "🟣"
-
-      when "o"
-        player_input[i] = "🟠"
-      end
+    i = 0
+    player_input.each do |object|
+      player_input[i] = transformation_hash[object]
+      i += 1
     end
     player_input
-  end
-
-  def gamemode_choice
-    puts "Do you want to be the codebreaker(1), or the codemaker(2)?"
-    loop do
-      gamemode = gets.chomp.to_i
-      if gamemode == 1
-        gamebreaker_loop
-        break
-      elsif gamemode == 2
-        gamemaker_loop
-        break
-      else
-        puts "Please enter 1 or 2"
-      end
-    end
   end
 end
 
@@ -233,7 +230,7 @@ You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and 
         print "Color number ##{count + 1}: "
         input = gets.chomp.downcase[0]
         if VALID_LETTERS.include?(input)
-          @player_input_array << input
+          player_input_array << input
           break
         else
           puts "Please only enter valid letters."
@@ -270,12 +267,13 @@ class Computer
 
   def generate_combination(colors)
     for i in 0..3
-    randomized_colors << colors[rand(6)]
+      randomized_colors << colors[rand(6)]
     end
-
     randomized_colors_string = randomized_colors.join("")
+    p randomized_colors_string
   end
 end
 
 #######################################################################################################################
 game = Game.new
+game.start
