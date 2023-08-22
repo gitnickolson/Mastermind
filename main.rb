@@ -75,8 +75,8 @@ end
 class Game
   attr_accessor :board, :pins, :com, :player, :randomized_pins,
                 :small_colors, :player_input, :turn_counter,
-                :combinations_hash, :randomized_colors_ords, :game_ended,
-                :possibilities
+                :combinations_hash, :colors_ords, :game_ended,
+                :possibilities, :codebreaker
   TURNS = 12
 
   def initialize
@@ -86,6 +86,16 @@ class Game
     @com = Computer.new
     @player = Player.new
     @possibilities = Array.new
+    @colors_ords = Array.new
+
+    @combinations_hash = {
+      '🔴' => 0,
+      '🟣' => 0,
+      '🟢' => 0,
+      '🔵' => 0,
+      '🟡' => 0,
+      '🟠' => 0
+    }
   end
 
   def start
@@ -94,10 +104,10 @@ class Game
     loop do
       gamemode = gets.chomp.to_i
       if gamemode == 1
-        gamebreaker_loop
+        codebreaker_loop
         break
       elsif gamemode == 2
-        gamemaker_loop
+        codemaker_loop
         break
       else
         puts 'Please enter 1 or 2'
@@ -107,67 +117,62 @@ class Game
 
   private
 
-  def gamebreaker_loop
+  def codebreaker_loop
+    @codebreaker = true
     @randomized_pins = com.generate_combination(pins.colors)
     @small_colors = pins.small_colors
-    @randomized_colors_ords = Array.new
     @game_ended = false
 
     @board.set_up
     @board.print_board
-
-    @combinations_hash = {
-      '🔴' => 0,
-      '🟣' => 0,
-      '🟢' => 0,
-      '🔵' => 0,
-      '🟡' => 0,
-      '🟠' => 0
-    }
-
     count_color_occurrences
-    TURNS.times do
+
+    loop do
       break if game_ended
-      game_state_gamebreaker
+      game_state_codebreaker
     end
   end
 
-  def gamemaker_loop
+  def codemaker_loop
+    @codebreaker = false
     @small_colors = pins.small_colors
-    @randomized_colors_ords = Array.new
     @game_ended = false
 
     @board.set_up
     @board.print_board
 
-    @combinations_hash = {
-      '🔴' => 0,
-      '🟣' => 0,
-      '🟢' => 0,
-      '🔵' => 0,
-      '🟡' => 0,
-      '🟠' => 0
-    }
+    player.get_player_input(true)
+    player_input = player.player_input_array
+    transform_player_input!(player_input)
+    count_color_occurrences(player_input)
 
-    game_state_gamemaker
+    game_state_codemaker(player_input)
   end
 
-  def count_color_occurrences
-    com.randomized_colors.each do |pin|
-      randomized_colors_ords << pin.ord
-      combinations_hash[pin] = randomized_colors_ords.count(pin.ord)
+  def count_color_occurrences(code = 0)
+    if codebreaker == true
+      com.randomized_colors.each do |pin|
+        colors_ords << pin.ord
+        combinations_hash[pin] = colors_ords.count(pin.ord)
+      end
+    else
+      code.each do |pin|
+        colors_ords << pin.ord
+        combinations_hash[pin] = colors_ords.count(pin.ord)
+        p combinations_hash
+      end
     end
   end
 
-  def game_state_gamebreaker
+  def game_state_codebreaker
     player.get_player_input(false)
     player_input = player.player_input_array
-    transform_player_input(player_input)
+    transform_player_input!(player_input)
 
     temporary_combinations_hash = combinations_hash.dup
 
     player_input.each_with_index do |player_pin, index|
-      if player_pin == randomized_pins[index] #&& (temporary_combinations_hash[player_pin]).positive?
+      if player_pin == randomized_pins[index] && (temporary_combinations_hash[player_pin]).positive?
         board.update_small_pins(small_colors, 0) # Green
         temporary_combinations_hash[player_pin] -= 1
       end
@@ -193,25 +198,36 @@ class Game
     end
   end
 
-  def game_state_gamemaker
-    player.get_player_input(true)
-    player_input = player.player_input_array
-    transform_player_input(player_input)
+  def game_state_codemaker(player_input)
     p player_input.join("")
 
     get_possibilities
     p possibilities
 
     current_guess = com.computer_turn(turn_counter, possibilities)
-    p current_guess
+
+    temporary_combinations_hash = combinations_hash.dup
+
+    current_guess.each_with_index do |computer_pin, index|
+      if computer_pin == player_input[index] && (temporary_combinations_hash[computer_pin]).positive?
+        board.update_small_pins(small_colors, 0) # Green
+        temporary_combinations_hash[computer_pin] -= 1
+      end
+    end
+
+    player_input.each_with_index do |computer_pin|
+      if player_input.include?(computer_pin) && (temporary_combinations_hash[computer_pin]).positive?
+        board.update_small_pins(small_colors, 1) # Purple
+        temporary_combinations_hash[computer_pin] -= 1
+      end
+    end
 
     board.board_row_update(current_guess)
     board.print_board
     @turn_counter += 1
-
   end
 
-  def decision_output(player_wins)
+  def decision_output(player_wins)  # kein output / trennen
     if player_wins == true
       @game_ended = true
       p "Congratulations! You won the game after #{turn_counter} turn(s)!"
@@ -228,7 +244,7 @@ class Game
     end
   end
 
-  def transform_player_input(player_input)
+  def transform_player_input!(player_input)
     transformation_hash = {
       'r' => '🔴',
       'g' => '🟢',
@@ -238,10 +254,8 @@ class Game
       'o' => '🟠'
     }
 
-    i = 0
-    player_input.each do |object|
+    player_input.each_with_index do |object, i|
       player_input[i] = transformation_hash[object]
-      i += 1
     end
     player_input
   end
@@ -256,8 +270,8 @@ class Player
     @player_input_array = Array.new
   end
 
-  def get_player_input(gamemaker)
-    if gamemaker == false
+  def get_player_input(codemaker)
+    if codemaker == false
       player_input_array.clear
       puts "Please enter 4 colors. Hit the enter key after each color.
 You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and O (Orange)."
@@ -288,11 +302,12 @@ end
 
 
 class Computer
-  attr_reader :randomized_colors_string, :randomized_colors
+  attr_reader :randomized_colors_string, :randomized_colors, :current_guess
   def initialize
     @possibilities = Array.new
     @randomized_colors = Array.new
     @randomized_colors_string
+    @current_guess = Array.new
   end
 
   def generate_combination(colors)
@@ -300,18 +315,19 @@ class Computer
       randomized_colors << colors[rand(6)]
     end
     randomized_colors_string = randomized_colors.join('')
-    p randomized_colors_string
   end
 
   def computer_turn(turn_counter, possibilities)
     previous_guesses = Array.new
 
     if turn_counter == 0
-      current_guess = possibilities.delete(["🔴", "🔴", "🔵", "🔵"])
+      current_guess = possibilities.delete_at(0)
       previous_guesses << current_guess
       current_guess
     else
+      possibilities.each_with_index do |combination, index|
 
+      end
     end
   end
 end
