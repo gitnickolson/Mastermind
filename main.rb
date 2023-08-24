@@ -56,25 +56,25 @@ class Board
     array
   end
 
-  def update_small_pins(small_colors, indicator)
-    board_visual[current_row + 1][current_pin_slot] = small_colors[indicator]
+  def update_small_pins(key_pegs, indicator)
+    board_visual[current_row + 1][current_pin_slot] = key_pegs[indicator]
     @current_pin_slot += 1
   end
 end
 
 
 class Pins
-  attr_reader :colors, :small_colors
+  attr_reader :colors, :key_pegs
   def initialize
     @colors = ['🔴', '🔵', '🟡', '🟢', '🟣', '🟠']
-    @small_colors = ['🟩', '🟪']
+    @key_pegs = ['🟩', '🟪'] # Green = correct guess, Purple = close guess
   end
 end
 
 
 class Game
   attr_accessor :board, :pins, :com, :player, :randomized_pins,
-                :small_colors, :player_input, :turn_counter,
+                :key_pegs, :player_input, :turn_counter,
                 :combinations_hash, :colors_ords, :game_ended,
                 :possibilities, :codebreaker
   TURNS = 12
@@ -120,7 +120,7 @@ class Game
   def codebreaker_loop
     @codebreaker = true
     @randomized_pins = com.generate_combination(pins.colors)
-    @small_colors = pins.small_colors
+    @key_pegs = pins.key_pegs
     @game_ended = false
 
     @board.set_up
@@ -135,7 +135,7 @@ class Game
 
   def codemaker_loop
     @codebreaker = false
-    @small_colors = pins.small_colors
+    @key_pegs = pins.key_pegs
     @game_ended = false
 
     @board.set_up
@@ -146,7 +146,10 @@ class Game
     transform_player_input!(player_input)
     count_color_occurrences(player_input)
 
-    game_state_codemaker(player_input)
+    2.times do
+      break if game_ended
+      game_state_codemaker(player_input)
+    end
   end
 
   def count_color_occurrences(code = 0)
@@ -181,7 +184,7 @@ class Game
   def game_state_codemaker(player_input)
     p player_input.join("")
     get_possibilities
-    current_guess = com.computer_turn(turn_counter, possibilities)
+    current_guess = com.computer_turn(turn_counter, possibilities, board, key_pegs)
     p current_guess
     temporary_combinations_hash = combinations_hash.dup
 
@@ -218,18 +221,25 @@ class Game
     end
   end
 
-  def guess_evaluation(guess, combinations, winning_combination)
+  def guess_evaluation(guess, color_counts, winning_combination)
+    done_colors = Array.new
     guess.each_with_index do |guess_pin, index|
-      if guess_pin == winning_combination[index] && (combinations[guess_pin]).positive?
-        board.update_small_pins(small_colors, 0) # Green
-        combinations[guess_pin] -= 1
+      if guess_pin == winning_combination[index] && color_counts[guess_pin].positive?
+        board.update_small_pins(key_pegs, 0) # Green
+        color_counts[guess_pin] -= 1
+
+        if color_counts[guess_pin] == guess.count(guess_pin)
+          done_colors << guess[index]
+        end
       end
     end
 
-    guess.each_with_index do |guess_pin|
-      if winning_combination.include?(guess_pin) && (combinations[guess_pin]).positive?
-        board.update_small_pins(small_colors, 1) # Purple
-        combinations[guess_pin] -= 1
+    guess.each do |guess_pin|
+      if !done_colors.include?(guess_pin)
+        if winning_combination.include?(guess_pin) && color_counts[guess_pin].positive?
+          board.update_small_pins(key_pegs, 1) # Purple
+          color_counts[guess_pin] -= 1
+        end
       end
     end
   end
@@ -307,12 +317,11 @@ class Computer
     randomized_colors_string = randomized_colors.join('')
   end
 
-  def computer_turn(turn_counter, possibilities)
+  def computer_turn(turn_counter, possibilities, board, key_pegs)
     previous_guesses = Array.new
 
     if turn_counter == 0
-      current_guess = possibilities.delete_at(0)
-      previous_guesses << current_guess
+      current_guess = possibilities.delete(["🔴", "🔴", "🟢", "🟢"])
       current_guess
     else
       possibilities.each_with_index do |combination, index|
@@ -326,6 +335,3 @@ end
 game = Game.new
 game.start
 
-# game.guess_evaluation is now a method
-# changed the code for said evaluation because it sometimes didn't work as it should
-# Changed the way how the game checks if someone won completely and made it compatible for both codebreaker and codemaker mode

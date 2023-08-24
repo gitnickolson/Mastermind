@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="08b1ff7e-5d18-4a09-b60e-e655ad8cd235" name="Changes" comment="Small changes">
+    <list default="true" id="08b1ff7e-5d18-4a09-b60e-e655ad8cd235" name="Changes" comment="Small changes&#10;- Less repetition in the code now">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.rb" beforeDir="false" afterPath="$PROJECT_DIR$/main.rb" afterDir="false" />
     </list>
@@ -82,7 +82,7 @@
       <workItem from="1692686832877" duration="20000" />
       <workItem from="1692686877343" duration="25190000" />
       <workItem from="1692858810389" duration="13000" />
-      <workItem from="1692858832831" duration="2290000" />
+      <workItem from="1692858832831" duration="11347000" />
     </task>
     <task id="LOCAL-00001" summary="You can now print the board">
       <option name="closed" value="true" />
@@ -172,7 +172,15 @@
       <option name="project" value="LOCAL" />
       <updated>1692717046705</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Small changes&#10;- Less repetition in the code now">
+      <option name="closed" value="true" />
+      <created>1692862059275</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1692862059275</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -198,10 +206,11 @@
     <MESSAGE value="Small changes&#10;- Made the code a bit more readable&#10;- Made some methods private that don't need to be public" />
     <MESSAGE value="Small changes&#10;- Began working on implementing the second game mode (Which is mainly for algorithm-demonstration purposes)" />
     <MESSAGE value="Small changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="Small changes" />
+    <MESSAGE value="Small changes&#10;- Less repetition in the code now" />
+    <option name="LAST_COMMIT_MESSAGE" value="Small changes&#10;- Less repetition in the code now" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Mastermind@Main.rcov" NAME="Main Coverage Results" MODIFIED="1692090454875" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="Mastermind" />
-    <SUITE FILE_PATH="coverage/Mastermind@main.rcov" NAME="main Coverage Results" MODIFIED="1692861086576" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="Mastermind" />
+    <SUITE FILE_PATH="coverage/Mastermind@main.rcov" NAME="main Coverage Results" MODIFIED="1692871063309" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="Mastermind" />
   </component>
 </project>
