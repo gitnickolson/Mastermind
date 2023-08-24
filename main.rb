@@ -168,79 +168,69 @@ class Game
     player.get_player_input(false)
     player_input = player.player_input_array
     transform_player_input!(player_input)
-
     temporary_combinations_hash = combinations_hash.dup
 
-    player_input.each_with_index do |player_pin, index|
-      if player_pin == randomized_pins[index] && (temporary_combinations_hash[player_pin]).positive?
-        board.update_small_pins(small_colors, 0) # Green
-        temporary_combinations_hash[player_pin] -= 1
-      end
-    end
-
-    player_input.each_with_index do |player_pin|
-      if randomized_pins.include?(player_pin) && (temporary_combinations_hash[player_pin]).positive?
-        board.update_small_pins(small_colors, 1) # Purple
-        temporary_combinations_hash[player_pin] -= 1
-      end
-    end
-
+    guess_evaluation(player_input, temporary_combinations_hash, randomized_pins)
     board.board_row_update(player_input)
     board.print_board
     @turn_counter += 1
 
-    if turn_counter < TURNS
-      comparable_player_input = player_input.join('')
-
-      decision_output(true) if randomized_pins == comparable_player_input
-    else
-      decision_output(false)
-    end
+    has_game_ended?(player_input.join(""), randomized_pins)
   end
 
   def game_state_codemaker(player_input)
     p player_input.join("")
-
     get_possibilities
-    p possibilities
-
     current_guess = com.computer_turn(turn_counter, possibilities)
-
+    p current_guess
     temporary_combinations_hash = combinations_hash.dup
 
-    current_guess.each_with_index do |computer_pin, index|
-      if computer_pin == player_input[index] && (temporary_combinations_hash[computer_pin]).positive?
-        board.update_small_pins(small_colors, 0) # Green
-        temporary_combinations_hash[computer_pin] -= 1
-      end
-    end
-
-    player_input.each_with_index do |computer_pin|
-      if player_input.include?(computer_pin) && (temporary_combinations_hash[computer_pin]).positive?
-        board.update_small_pins(small_colors, 1) # Purple
-        temporary_combinations_hash[computer_pin] -= 1
-      end
-    end
-
+    guess_evaluation(current_guess, temporary_combinations_hash, player_input)
     board.board_row_update(current_guess)
     board.print_board
     @turn_counter += 1
   end
 
-  def decision_output(player_wins)  # kein output / trennen
-    if player_wins == true
+  def has_game_ended?(guess, correct_code)
+    if turn_counter < TURNS
+      if randomized_pins == guess
+        @game_ended = true
+        decision_output(true, correct_code)
+      end
+    else
       @game_ended = true
+      decision_output(false, correct_code)
+    end
+  end
+
+  def decision_output(player_wins, correct_code)
+    if player_wins
       p "Congratulations! You won the game after #{turn_counter} turn(s)!"
-    elsif player_wins == false
-      @game_ended = true
+    else
       p "You couldn't guess the correct color pattern within 12 turns. You lose!"
-      p "The correct color pattern would've been #{randomized_pins}"
+      p "The correct color pattern would've been #{correct_code}"
     end
   end
 
   def get_possibilities
     pins.colors.repeated_permutation(4) do |combination|
       possibilities << combination
+    end
+  end
+
+  def guess_evaluation(guess, combinations, winning_combination)
+    guess.each_with_index do |guess_pin, index|
+      if guess_pin == winning_combination[index] && (combinations[guess_pin]).positive?
+        board.update_small_pins(small_colors, 0) # Green
+        combinations[guess_pin] -= 1
+      end
+    end
+
+    guess.each_with_index do |guess_pin|
+      if winning_combination.include?(guess_pin) && (combinations[guess_pin]).positive?
+        board.update_small_pins(small_colors, 1) # Purple
+        combinations[guess_pin] -= 1
+      end
     end
   end
 
@@ -335,3 +325,7 @@ end
 #######################################################################################################################
 game = Game.new
 game.start
+
+# game.guess_evaluation is now a method
+# changed the code for said evaluation because it sometimes didn't work as it should
+# Changed the way how the game checks if someone won completely and made it compatible for both codebreaker and codemaker mode
