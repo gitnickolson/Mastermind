@@ -173,12 +173,12 @@ class Game
     transform_player_input!(player_input)
     temporary_combinations_hash = combinations_hash.dup
 
-    guess_evaluation(player_input, temporary_combinations_hash, randomized_pins)
+    guess_evaluation(player_input, temporary_combinations_hash, randomized_pins, false)
     board.board_row_update(player_input)
     board.print_board
     @turn_counter += 1
 
-    has_game_ended?(player_input.join(""), randomized_pins)
+    game_end(player_input.join(""), randomized_pins)
   end
 
   def game_state_codemaker(player_input)
@@ -188,19 +188,19 @@ class Game
     p current_guess
     temporary_combinations_hash = combinations_hash.dup
 
-    guess_evaluation(current_guess, temporary_combinations_hash, player_input)
+    guess_evaluation(current_guess, temporary_combinations_hash, player_input, false)
     board.board_row_update(current_guess)
     board.print_board
     @turn_counter += 1
+
+    game_end(current_guess.join(""), player_input)
   end
 
-  def has_game_ended?(guess, correct_code)
-    if turn_counter < TURNS
-      if randomized_pins == guess
-        @game_ended = true
-        decision_output(true, correct_code)
-      end
-    else
+  def game_end(guess, correct_code)
+    if randomized_pins == guess
+      @game_ended = true
+      decision_output(true, correct_code)
+    elsif turn_counter == TURNS
       @game_ended = true
       decision_output(false, correct_code)
     end
@@ -224,12 +224,12 @@ class Game
   def guess_evaluation(guess, color_counts, winning_combination)
     done_colors = Array.new
     guess.each_with_index do |guess_pin, index|
-      if guess_pin == winning_combination[index] && color_counts[guess_pin].positive?
+      if guess_pin == winning_combination[index]
         board.update_small_pins(key_pegs, 0) # Green
         color_counts[guess_pin] -= 1
 
         if color_counts[guess_pin] == guess.count(guess_pin)
-          done_colors << guess[index]
+          done_colors << guess_pin
         end
       end
     end
@@ -315,17 +315,47 @@ class Computer
       randomized_colors << colors[rand(6)]
     end
     randomized_colors_string = randomized_colors.join('')
+    p randomized_colors_string
   end
 
   def computer_turn(turn_counter, possibilities, board, key_pegs)
-    previous_guesses = Array.new
+    previous_feedback = Array.new
 
-    if turn_counter == 0
+    case turn_counter
+    when 0
       current_guess = possibilities.delete(["🔴", "🔴", "🟢", "🟢"])
       current_guess
+    when 1..11
+      previous_feedback = board.board_visual[board.current_row - 1]
+      evaluate_feedback(previous_feedback, current_guess, possibilities)
     else
-      possibilities.each_with_index do |combination, index|
 
+    end
+  end
+
+  def evaluate_feedback(previous_feedback, last_guess, possibilities)
+
+  end
+
+  def simulated_guess_evaluation(possibility, color_counts, winning_combination)
+    done_colors = Array.new
+    guess.each_with_index do |guess_pin, index|
+      if guess_pin == winning_combination[index]
+        board.update_small_pins(key_pegs, 0) # Green
+        color_counts[guess_pin] -= 1
+
+        if color_counts[guess_pin] == guess.count(guess_pin)
+          done_colors << guess_pin
+        end
+      end
+    end
+
+    guess.each do |guess_pin|
+      if !done_colors.include?(guess_pin)
+        if winning_combination.include?(guess_pin) && color_counts[guess_pin].positive?
+          board.update_small_pins(key_pegs, 1) # Purple
+          color_counts[guess_pin] -= 1
+        end
       end
     end
   end
