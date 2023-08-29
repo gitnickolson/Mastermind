@@ -127,8 +127,7 @@ class Game
     @board.print_board
     count_color_occurrences
 
-    loop do
-      break if game_ended
+    until game_ended do
       game_state_codebreaker
     end
   end
@@ -146,8 +145,7 @@ class Game
     transform_player_input!(player_input)
     count_color_occurrences(player_input)
 
-    2.times do
-      break if game_ended
+    until game_ended do
       game_state_codemaker(player_input)
     end
   end
@@ -162,7 +160,7 @@ class Game
       code.each do |pin|
         colors_ords << pin.ord
         combinations_hash[pin] = colors_ords.count(pin.ord)
-        p combinations_hash
+        combinations_hash
       end
     end
   end
@@ -182,7 +180,6 @@ class Game
   end
 
   def game_state_codemaker(player_input)
-    p player_input.join("")
     get_possibilities
     current_guess = com.computer_turn(turn_counter, possibilities, board, key_pegs)
     p current_guess
@@ -193,31 +190,33 @@ class Game
     board.print_board
     @turn_counter += 1
 
-    game_end(current_guess.join(""), player_input)
+    game_end(current_guess, player_input)
   end
 
   def game_end(guess, correct_code)
-    if randomized_pins == guess
+    if randomized_pins == guess or correct_code == guess
       @game_ended = true
-      decision_output(true, correct_code)
+      decision_output(true)
     elsif turn_counter == TURNS
       @game_ended = true
       decision_output(false, correct_code)
     end
   end
 
-  def decision_output(player_wins, correct_code)
+  def decision_output(player_wins, correct_code = 0)
     if player_wins
       p "Congratulations! You won the game after #{turn_counter} turn(s)!"
     else
       p "You couldn't guess the correct color pattern within 12 turns. You lose!"
-      p "The correct color pattern would've been #{correct_code}"
+      p "The correct color pattern would've been #{correct_code.join("")}"
     end
   end
 
   def get_possibilities
-    pins.colors.repeated_permutation(4) do |combination|
-      possibilities << combination
+    if possibilities.empty?
+      pins.colors.repeated_permutation(4) do |combination|
+        possibilities << combination
+      end
     end
   end
 
@@ -302,13 +301,13 @@ end
 
 
 class Computer
-  attr_reader :randomized_colors_string, :randomized_colors, :current_guess, :possibilities
+  attr_reader :randomized_colors_string, :randomized_colors, :previous_guess, :previous_feedback
 
   def initialize
-    @possibilities = Array.new
     @randomized_colors = Array.new
     @randomized_colors_string
-    @current_guess = Array.new
+    @previous_guess = Array.new
+    @previous_feedback = Array.new
   end
 
   def generate_combination(colors)
@@ -316,7 +315,7 @@ class Computer
       randomized_colors << colors[rand(6)]
     end
     randomized_colors_string = randomized_colors.join('')
-    # p randomized_colors_string
+    p randomized_colors_string
   end
 
   def computer_turn(turn_counter, possibilities, board, key_pegs)
@@ -324,44 +323,68 @@ class Computer
 
     case turn_counter
     when 0
-      current_guess = possibilities.delete(["🔴", "🔴", "🟢", "🟢"])
-      previous_guess = current_guess
+      #current_guess = possibilities.delete(["🔴", "🟢", "🟣", "🔵"])
+      #current_guess = possibilities.delete(["🔴", "🔴", "🟢", "🟢"])
+      current_guess = possibilities.sample
+      possibilities.delete(current_guess)
+      @previous_guess = current_guess
       current_guess
-    when 1..11
-      previous_feedback = board.board_visual[board.current_row - 1]
-      possibilities.each do |possibility|
-        simulated_guess_evaluation(possibility, previous_guess, previous_feedback)
-      end
-    else
+    when 1..12
+      @previous_feedback = board.board_visual[board.current_row - 1]
+      current_guess = find_best_guess(possibilities)
 
+      #current_guess = possibilities.sample
+       possibilities.delete(current_guess)
     end
   end
 
-  def simulated_guess_evaluation(possibility, previous_guess, previous_feedback)
-    done_colors = Array.new
-    guess.each_with_index do |guess_pin, index|
-      if guess_pin == winning_combination[index]
-        board.update_small_pins(key_pegs, 0) # Green
-        color_counts[guess_pin] -= 1
+  def find_best_guess(possibilities)
+    best_guess = nil
+    best_score = -1
 
-        if color_counts[guess_pin] == guess.count(guess_pin)
-          done_colors << guess_pin
-        end
+    feedback_translator = {
+      '◼️' => 0,
+      '🟪' => 1,
+      '🟩' => 2
+    }
+
+    possibilities.each_with_index do |guess, index|
+      guess_score = calculate_score(guess, feedback_translator)
+      if guess_score > best_score
+        best_score = guess_score
+        best_guess = guess
+      else
+        possibilities.delete_at(index)
       end
     end
 
-    guess.each do |guess_pin|
-      if !done_colors.include?(guess_pin)
-        if winning_combination.include?(guess_pin) && color_counts[guess_pin].positive?
-          board.update_small_pins(key_pegs, 1) # Purple
-          color_counts[guess_pin] -= 1
-        end
-      end
-    end
+    best_guess
   end
+
+  def calculate_score(guess, feedback_translator)
+    feedback_points = 0
+    guess.each_with_index do |possibility_pin, index|
+      if possibility_pin == previous_guess[index]
+        feedback_points += feedback_translator["🟩"]
+      elsif previous_guess.include?(possibility_pin)
+        feedback_points += feedback_translator["🟪"]
+      end
+    end
+    feedback_points
+  end
+
 end
 
 #######################################################################################################################
 game = Game.new
 game.start
+
+
+# Algorithmus soll die evaluation methode aus game benutze
+# => Dafür muss ich diese so umschreiben, dass Board sich seperat updated
+# Der Algorithmus funktioniert dann wie folgt
+# ich gebe einen ersten guess ab, dann iteriere ich durch den möglichkeiten array gegen diesen guess und
+# behalte nur jene Möglichkeiten in meinen Möglichkeiten, die genau das selbe feedback erzeugen wie der gesetzte guess.
+# Aus den übrigen Möglichkeiten entnehme ich dann einen random guess und gebe diesen ab
+# dieses verfahren verfolge ich so oft bis ich durch bin
 
