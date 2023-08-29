@@ -173,7 +173,7 @@ class Game
     transform_player_input!(player_input)
     temporary_combinations_hash = combinations_hash.dup
 
-    guess_evaluation(player_input, temporary_combinations_hash, randomized_pins, false)
+    guess_evaluation(player_input, temporary_combinations_hash, randomized_pins)
     board.board_row_update(player_input)
     board.print_board
     @turn_counter += 1
@@ -188,7 +188,7 @@ class Game
     p current_guess
     temporary_combinations_hash = combinations_hash.dup
 
-    guess_evaluation(current_guess, temporary_combinations_hash, player_input, false)
+    guess_evaluation(current_guess, temporary_combinations_hash, player_input)
     board.board_row_update(current_guess)
     board.print_board
     @turn_counter += 1
@@ -302,7 +302,8 @@ end
 
 
 class Computer
-  attr_reader :randomized_colors_string, :randomized_colors, :current_guess
+  attr_reader :randomized_colors_string, :randomized_colors, :current_guess, :possibilities
+
   def initialize
     @possibilities = Array.new
     @randomized_colors = Array.new
@@ -315,7 +316,7 @@ class Computer
       randomized_colors << colors[rand(6)]
     end
     randomized_colors_string = randomized_colors.join('')
-    p randomized_colors_string
+    # p randomized_colors_string
   end
 
   def computer_turn(turn_counter, possibilities, board, key_pegs)
@@ -324,20 +325,19 @@ class Computer
     case turn_counter
     when 0
       current_guess = possibilities.delete(["🔴", "🔴", "🟢", "🟢"])
+      previous_guess = current_guess
       current_guess
     when 1..11
       previous_feedback = board.board_visual[board.current_row - 1]
-      evaluate_feedback(previous_feedback, current_guess, possibilities)
+      possibilities.each do |possibility|
+        simulated_guess_evaluation(possibility, previous_guess, previous_feedback)
+      end
     else
 
     end
   end
 
-  def evaluate_feedback(previous_feedback, last_guess, possibilities)
-
-  end
-
-  def simulated_guess_evaluation(possibility, color_counts, winning_combination)
+  def simulated_guess_evaluation(possibility, previous_guess, previous_feedback)
     done_colors = Array.new
     guess.each_with_index do |guess_pin, index|
       if guess_pin == winning_combination[index]
