@@ -56,9 +56,11 @@ class Board
     array
   end
 
-  def update_small_pins(key_pegs, indicator)
-    board_visual[current_row + 1][current_pin_slot] = key_pegs[indicator]
-    @current_pin_slot += 1
+  def update_small_pins(key_peg, board_rewrite)
+    if board_rewrite == true
+      board_visual[current_row + 1][current_pin_slot] = key_peg
+      @current_pin_slot += 1
+    end
   end
 end
 
@@ -76,17 +78,18 @@ class Game
   attr_accessor :board, :pins, :com, :player, :randomized_pins,
                 :key_pegs, :player_input, :turn_counter,
                 :combinations_hash, :colors_ords, :game_ended,
-                :possibilities, :codebreaker
+                :possibilities, :codebreaker, :game_mode
   TURNS = 12
 
   def initialize
     @turn_counter = 0
     @board = Board.new
     @pins = Pins.new
-    @com = Computer.new
+    @com = Computer.new(self)
     @player = Player.new
     @possibilities = Array.new
     @colors_ords = Array.new
+    @game_mode = 0
 
     @combinations_hash = {
       '🔴' => 0,
@@ -102,17 +105,44 @@ class Game
     puts "Welcome to mastermind! You can check out this link if you need the rules: 'https://en.wikipedia.org/wiki/Mastermind_'"
     puts 'Do you want to be the codebreaker(1), or the codemaker(2)?'
     loop do
-      gamemode = gets.chomp.to_i
-      if gamemode == 1
+      @game_mode = gets.chomp.to_i
+      if game_mode == 1
         codebreaker_loop
         break
-      elsif gamemode == 2
+      elsif game_mode == 2
         codemaker_loop
         break
       else
         puts 'Please enter 1 or 2'
       end
     end
+  end
+
+  def guess_evaluation(guess, color_counts, winning_combination, board_rewrite)
+    feedback = Array.new
+    done_colors = Array.new
+    guess.each_with_index do |guess_pin, index|
+      if guess_pin == winning_combination[index]
+        board.update_small_pins(key_pegs[0], board_rewrite) # Green
+        color_counts[guess_pin] -= 1
+        feedback << "🟩"
+
+        if color_counts[guess_pin] == guess.count(guess_pin)
+          done_colors << guess_pin
+        end
+      end
+    end
+
+    guess.each do |guess_pin|
+      if !done_colors.include?(guess_pin)
+        if winning_combination.include?(guess_pin) && color_counts[guess_pin].positive?
+          board.update_small_pins(key_pegs[1], board_rewrite) # Purple
+          color_counts[guess_pin] -= 1
+          feedback << "🟪"
+        end
+      end
+    end
+    feedback.sort!.reverse!
   end
 
   private
@@ -127,9 +157,7 @@ class Game
     @board.print_board
     count_color_occurrences
 
-    until game_ended do
-      game_state_codebreaker
-    end
+    game_loop(player_input)
   end
 
   def codemaker_loop
@@ -145,8 +173,18 @@ class Game
     transform_player_input!(player_input)
     count_color_occurrences(player_input)
 
-    until game_ended do
-      game_state_codemaker(player_input)
+    game_loop(player_input)
+  end
+
+  def game_loop(player_input)
+    if game_mode == 2
+      until game_ended do
+        game_state_codemaker(player_input)
+      end
+    elsif game_mode == 1
+      until game_ended do
+        game_state_codebreaker
+      end
     end
   end
 
@@ -171,7 +209,7 @@ class Game
     transform_player_input!(player_input)
     temporary_combinations_hash = combinations_hash.dup
 
-    guess_evaluation(player_input, temporary_combinations_hash, randomized_pins)
+    guess_evaluation(player_input, temporary_combinations_hash, randomized_pins, true)
     board.board_row_update(player_input)
     board.print_board
     @turn_counter += 1
@@ -180,17 +218,18 @@ class Game
   end
 
   def game_state_codemaker(player_input)
-    get_possibilities
+    if possibilities.empty?
+      get_possibilities
+    end
     current_guess = com.computer_turn(turn_counter, possibilities, board, key_pegs)
-    p current_guess
     temporary_combinations_hash = combinations_hash.dup
 
-    guess_evaluation(current_guess, temporary_combinations_hash, player_input)
+    guess_evaluation(current_guess, temporary_combinations_hash, player_input, true)
     board.board_row_update(current_guess)
     board.print_board
     @turn_counter += 1
 
-    game_end(current_guess, player_input)
+    game_end(current_guess.join(""), player_input.join(""))
   end
 
   def game_end(guess, correct_code)
@@ -204,42 +243,25 @@ class Game
   end
 
   def decision_output(player_wins, correct_code = 0)
-    if player_wins
-      p "Congratulations! You won the game after #{turn_counter} turn(s)!"
+    if game_mode == 1
+      if player_wins
+        p "Congratulations! You won the game after #{turn_counter} turn(s)!"
+      else
+        p "You couldn't guess the correct color pattern within 12 turns. You lose!"
+        p "The correct color pattern would've been #{correct_code}"
+      end
     else
-      p "You couldn't guess the correct color pattern within 12 turns. You lose!"
-      p "The correct color pattern would've been #{correct_code.join("")}"
+      if player_wins
+        p "Damn! The computer won the game after #{turn_counter} turn(s)!"
+      else
+        p "Congratulations! The computer couldn't guess your secret code (#{correct_code}) within 12 turns!"
+      end
     end
   end
 
   def get_possibilities
-    if possibilities.empty?
-      pins.colors.repeated_permutation(4) do |combination|
-        possibilities << combination
-      end
-    end
-  end
-
-  def guess_evaluation(guess, color_counts, winning_combination)
-    done_colors = Array.new
-    guess.each_with_index do |guess_pin, index|
-      if guess_pin == winning_combination[index]
-        board.update_small_pins(key_pegs, 0) # Green
-        color_counts[guess_pin] -= 1
-
-        if color_counts[guess_pin] == guess.count(guess_pin)
-          done_colors << guess_pin
-        end
-      end
-    end
-
-    guess.each do |guess_pin|
-      if !done_colors.include?(guess_pin)
-        if winning_combination.include?(guess_pin) && color_counts[guess_pin].positive?
-          board.update_small_pins(key_pegs, 1) # Purple
-          color_counts[guess_pin] -= 1
-        end
-      end
+    pins.colors.repeated_permutation(4) do |combination|
+      possibilities << combination
     end
   end
 
@@ -301,13 +323,16 @@ end
 
 
 class Computer
-  attr_reader :randomized_colors_string, :randomized_colors, :previous_guess, :previous_feedback
+  attr_reader :randomized_colors_string, :randomized_colors, :previous_guess,
+              :transformed_previous_feedback, :game, :true_possibilities
 
-  def initialize
+  def initialize(game)
     @randomized_colors = Array.new
     @randomized_colors_string
     @previous_guess = Array.new
-    @previous_feedback = Array.new
+    @transformed_previous_feedback = Array.new
+    @true_possibilities = Array.new
+    @game = game
   end
 
   def generate_combination(colors)
@@ -315,76 +340,67 @@ class Computer
       randomized_colors << colors[rand(6)]
     end
     randomized_colors_string = randomized_colors.join('')
-    p randomized_colors_string
   end
 
   def computer_turn(turn_counter, possibilities, board, key_pegs)
-    previous_feedback = Array.new
-
     case turn_counter
     when 0
-      #current_guess = possibilities.delete(["🔴", "🟢", "🟣", "🔵"])
       #current_guess = possibilities.delete(["🔴", "🔴", "🟢", "🟢"])
-      current_guess = possibilities.sample
-      possibilities.delete(current_guess)
+      current_guess = possibilities.delete(possibilities.sample)
       @previous_guess = current_guess
       current_guess
-    when 1..12
-      @previous_feedback = board.board_visual[board.current_row - 1]
-      current_guess = find_best_guess(possibilities)
 
-      #current_guess = possibilities.sample
-       possibilities.delete(current_guess)
+    when 1..12
+      transformed_previous_feedback.clear
+      previous_feedback = board.board_visual[board.current_row - 1]
+
+      previous_feedback.each do |element|
+        if element != "◼️"
+          transformed_previous_feedback << element
+        end
+      end
+
+      current_guess = find_best_guess(possibilities)
+      @previous_guess = current_guess
+      possibilities.delete(current_guess)
+      current_guess
     end
   end
 
   def find_best_guess(possibilities)
-    best_guess = nil
-    best_score = -1
-
-    feedback_translator = {
-      '◼️' => 0,
-      '🟪' => 1,
-      '🟩' => 2
+    color_counts = {
+      '🔴' => 0,
+      '🟣' => 0,
+      '🟢' => 0,
+      '🔵' => 0,
+      '🟡' => 0,
+      '🟠' => 0
     }
 
+    previous_guess.each do |guess|
+      color_counts[guess] += 1
+      color_counts
+    end
+
     possibilities.each_with_index do |guess, index|
-      guess_score = calculate_score(guess, feedback_translator)
-      if guess_score > best_score
-        best_score = guess_score
-        best_guess = guess
-      else
-        possibilities.delete_at(index)
+      possible_feedback = game.guess_evaluation(guess, color_counts, previous_guess, false)
+      if possible_feedback == transformed_previous_feedback
+        @true_possibilities << guess
       end
+      possibilities.delete(guess)
     end
 
-    best_guess
-  end
-
-  def calculate_score(guess, feedback_translator)
-    feedback_points = 0
-    guess.each_with_index do |possibility_pin, index|
-      if possibility_pin == previous_guess[index]
-        feedback_points += feedback_translator["🟩"]
-      elsif previous_guess.include?(possibility_pin)
-        feedback_points += feedback_translator["🟪"]
-      end
+    if true_possibilities.empty?
+      next_guess = possibilities.sample
+    else
+      next_guess = true_possibilities.sample
     end
-    feedback_points
-  end
 
+    true_possibilities.delete(next_guess)
+    next_guess
+  end
 end
 
 #######################################################################################################################
 game = Game.new
 game.start
-
-
-# Algorithmus soll die evaluation methode aus game benutze
-# => Dafür muss ich diese so umschreiben, dass Board sich seperat updated
-# Der Algorithmus funktioniert dann wie folgt
-# ich gebe einen ersten guess ab, dann iteriere ich durch den möglichkeiten array gegen diesen guess und
-# behalte nur jene Möglichkeiten in meinen Möglichkeiten, die genau das selbe feedback erzeugen wie der gesetzte guess.
-# Aus den übrigen Möglichkeiten entnehme ich dann einen random guess und gebe diesen ab
-# dieses verfahren verfolge ich so oft bis ich durch bin
-

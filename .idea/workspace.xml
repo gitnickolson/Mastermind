@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="08b1ff7e-5d18-4a09-b60e-e655ad8cd235" name="Changes" comment="Fixed a big bug!&#10;- Finally fixed the bug that sometimes showed two key-pegs for a single color, therefore the game is now playable without confusing and wrong hints">
+    <list default="true" id="08b1ff7e-5d18-4a09-b60e-e655ad8cd235" name="Changes" comment="Working on the Computer Algorithm">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.rb" beforeDir="false" afterPath="$PROJECT_DIR$/main.rb" afterDir="false" />
     </list>
@@ -87,7 +87,11 @@
       <workItem from="1692971594324" duration="716000" />
       <workItem from="1693037090501" duration="16000" />
       <workItem from="1693039453048" duration="453000" />
-      <workItem from="1693290233560" duration="1296000" />
+      <workItem from="1693290233560" duration="24570000" />
+      <workItem from="1693322246111" duration="654000" />
+      <workItem from="1693379804117" duration="99000" />
+      <workItem from="1693464672518" duration="23768000" />
+      <workItem from="1693556175616" duration="1118000" />
     </task>
     <task id="LOCAL-00001" summary="You can now print the board">
       <option name="closed" value="true" />
@@ -193,7 +197,31 @@
       <option name="project" value="LOCAL" />
       <updated>1692871211883</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Fixed a bug&#10;- Fixed a bug that'd make you lose the game in turn 12 regardless of your 12th guess">
+      <option name="closed" value="true" />
+      <created>1693294335787</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1693294335787</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Small bugfix&#10;- correct combination was shown at game start, now fixed">
+      <option name="closed" value="true" />
+      <created>1693294900327</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1693294900327</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Working on the Computer Algorithm">
+      <option name="closed" value="true" />
+      <created>1693319543255</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1693319543255</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -221,10 +249,13 @@
     <MESSAGE value="Small changes" />
     <MESSAGE value="Small changes&#10;- Less repetition in the code now" />
     <MESSAGE value="Fixed a big bug!&#10;- Finally fixed the bug that sometimes showed two key-pegs for a single color, therefore the game is now playable without confusing and wrong hints" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed a big bug!&#10;- Finally fixed the bug that sometimes showed two key-pegs for a single color, therefore the game is now playable without confusing and wrong hints" />
+    <MESSAGE value="Fixed a bug&#10;- Fixed a bug that'd make you lose the game in turn 12 regardless of your 12th guess" />
+    <MESSAGE value="Small bugfix&#10;- correct combination was shown at game start, now fixed" />
+    <MESSAGE value="Working on the Computer Algorithm" />
+    <option name="LAST_COMMIT_MESSAGE" value="Working on the Computer Algorithm" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Mastermind@Main.rcov" NAME="Main Coverage Results" MODIFIED="1692090454875" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="Mastermind" />
-    <SUITE FILE_PATH="coverage/Mastermind@main.rcov" NAME="main Coverage Results" MODIFIED="1693039724528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="Mastermind" />
+    <SUITE FILE_PATH="coverage/Mastermind@main.rcov" NAME="main Coverage Results" MODIFIED="1693556510230" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="Mastermind" />
   </component>
 </project>
