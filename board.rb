@@ -2,7 +2,6 @@ require_relative 'pins'
 
 class Board
   attr_accessor :turns, :board_visual, :pin_board, :has_walls, :current_pin_slot, :current_row
-
   def initialize
     @board_visual = Array.new(26)
     @current_row = 2
