@@ -1,8 +1,10 @@
-require_relative 'pins'
+# frozen_string_literal: true
 
+require_relative 'pins'
 
 class Board
   attr_accessor :turns, :board_visual, :pin_board, :has_walls, :current_pin_slot, :current_row
+
   def initialize
     @board_visual = Array.new(26)
     @current_row = 2
@@ -51,7 +53,7 @@ class Board
   end
 
   def update_board(player_combination, array)
-    for i in 0..3
+    4.times do |i|
       array[i] = player_combination[i]
     end
     array

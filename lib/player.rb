@@ -1,28 +1,27 @@
+# frozen_string_literal: true
+
 require_relative 'game'
 require_relative 'pins'
-
 
 class Player
   attr_reader :player_input_array
 
-  VALID_LETTERS = %w[r g b y o p]
+  VALID_LETTERS = %w[r g b y o p].freeze
 
   def initialize
     @player_input_array = []
   end
 
   def get_player_input(codemaker)
+    player_input_array.clear
     if codemaker == false
-      player_input_array.clear
       puts "Please enter 4 colors. Hit the enter key after each color.
 You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and O (Orange)."
-      get_colors_loop
     else
-      player_input_array.clear
       puts "Please proceed by entering the desired color combination for the computer to guess. \n
 You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and O (Orange)."
-      get_colors_loop
     end
+    get_colors_loop
   end
 
   def get_colors_loop
