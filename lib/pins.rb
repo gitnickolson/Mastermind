@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 class Pins
   attr_reader :colors, :key_pegs
-
 
   def initialize
     @colors = ['🔴', '🔵', '🟡', '🟢', '🟣', '🟠']

@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require_relative 'player'
 require_relative 'pins'
 require_relative 'board'
 require_relative 'computer'
-
 
 class Game
   attr_accessor :board, :pins, :com, :player, :randomized_pins,
@@ -156,7 +157,7 @@ class Game
   end
 
   def game_end(guess, correct_code)
-    if randomized_pins == guess or correct_code == guess
+    if (randomized_pins == guess) || (correct_code == guess)
       @game_ended = true
       decision_output(true)
     elsif turn_counter == TURNS

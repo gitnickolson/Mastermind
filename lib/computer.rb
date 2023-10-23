@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'game'
 require_relative 'pins'
 
@@ -14,10 +16,10 @@ class Computer
   end
 
   def generate_combination(colors)
-    for i in 0..3
+    4.times do |_|
       randomized_colors << colors[rand(6)]
     end
-    randomized_colors_string = randomized_colors.join('')
+    randomized_colors.join('')
   end
 
   def computer_turn(turn_counter, possibilities, board, _key_pegs)
