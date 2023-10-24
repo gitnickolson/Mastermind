@@ -15,16 +15,16 @@ class Player
   def get_player_input(codemaker)
     player_input_array.clear
     if codemaker == false
-      puts "Please enter 4 colors. Hit the enter key after each color.
-You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and O (Orange)."
+      puts "Please enter 4 colors. Hit the enter key after each color. \n
+You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and O (Orange). You can also type \"exit\" to quit the game."
     else
       puts "Please proceed by entering the desired color combination for the computer to guess. \n
-You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and O (Orange)."
+You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and O (Orange). You can also type \"exit\" to quit the game."
     end
-    get_colors_loop
+    use_colors_loop
   end
 
-  def get_colors_loop
+  def use_colors_loop
     4.times do |count|
       loop do
         print "Color number ##{count + 1}: "
@@ -32,6 +32,8 @@ You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and 
         if VALID_LETTERS.include?(input)
           @player_input_array << input
           break
+        elsif input == 'exit'
+          exit(0)
         else
           puts 'Please only enter valid letters.'
         end

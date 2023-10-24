@@ -144,7 +144,7 @@ class Game
   end
 
   def game_state_codemaker(player_input)
-    get_possibilities if possibilities.empty?
+    generate_possibilities if possibilities.empty?
     current_guess = com.computer_turn(turn_counter, possibilities, board, key_pegs)
     temporary_combinations_hash = combinations_hash.dup
 
@@ -181,7 +181,7 @@ class Game
     end
   end
 
-  def get_possibilities
+  def generate_possibilities
     pins.colors.repeated_permutation(4) do |combination|
       possibilities << combination
     end
