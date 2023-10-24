@@ -181,7 +181,7 @@ class Game
     end
   end
 
-  def get_possibilities
+  def generate_possibilities
     pins.colors.repeated_permutation(4) do |combination|
       possibilities << combination
     end

@@ -12,7 +12,7 @@ class Board
   end
 
   def set_up
-    board_visual.map! { |_a, _b, _c, _d| a = '', b = '', c = '', d = '' }
+    board_visual.map! { |a, b, c, d| a = '', b = '', c = '', d = '' }
     board_visual.each_with_index do |row, row_index|
       row.each_with_index do |_field, column_index|
         row[column_index] = if row_index.even?
