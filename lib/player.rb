@@ -21,7 +21,7 @@ You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and 
       puts "Please proceed by entering the desired color combination for the computer to guess. \n
 You can choose between R (Red), G (Green), B (Blue), Y (Yellow), P (Purple) and O (Orange). You can also type \"exit\" to quit the game."
     end
-    get_colors_loop
+    use_colors_loop
   end
 
   def use_colors_loop
